@@ -46,3 +46,8 @@
                 Não pode alterar data de nascimento, CPF e username.
         - Desconectar
             - Retorna a página de login e encerra a sessão.
+
+# Links
+
+[Figma](https://www.figma.com/file/2m3Nc9IfR4PuKKjQk0TG2M/Untitled?node-id=0%3A1)
+[Github](https://)
