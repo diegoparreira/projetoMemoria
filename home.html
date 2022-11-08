@@ -13,27 +13,60 @@
 </head>
 
 <body>
+    <div class="modal-azr" id="my-modal-1">
+        <div class="modal-azr-content">
+            <div class="modal-top">
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-main">
+                <h1>Novo Jogo</h1>
+                <div class="modal-group">
+                    <label for="config-player">Número de players</label>
+                    <select id="config-player" name="config-player" onchange="handlePlayers()">
+                        <option value="null">Selecione</option>
+                    </select>
+                </div>
+                <div class="modal-form">
+                    <div class="modal-group">
+                        <label for="config-tab">Configuração do tabuleiro</label>
+                        <select id="config-tab" name="config-tab" onchange="handleBoard()">
+                            <option value="null">Selecione</option>
+                        </select>
+                    </div>
+                    <div class="modal-group">
+                        <label for="config-bombas">Modo de jogo</label>
+                        <select id="config-mode" name="config-mode" onchange="handleMode()">
+                            <option value="null">Selecione</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-button">
+                    <button class="button" onclick="handleNewGame()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <nav class="navbar navinfo">
             <div class="info-group">
-                <span class="info-label">Tempo</span>
-                <div class="info-panel"></div>
+                <span class="info-label">Players</span>
+                <div class="info-panel" id="info-players"></div>
+            </div>
+            <div class="info-group">
+                <span class="info-label" id="label-time">Tempo</span>
+                <div class="info-panel" id="info-time"></div>
             </div>
             <div class="info-group">
                 <div class="info-label">Configuração</div>
-                <div class="info-panel"></div>
+                <div class="info-panel" id="info-config"></div>
             </div>
             <div class="info-group">
                 <span class="info-label">Modalidade</span>
-                <div class="info-panel" ></div>
+                <div class="info-panel" id="info-mode"></div>
             </div>
             <div class="info-group">
                 <span class="info-label">Pontos</span>
-                <div class="info-panel" ></div>
-            </div>
-            <div class="info-group">
-                <span class="info-label">Tempo restante</span>
-                <div class="info-panel" ></div>
+                <div class="info-panel" id="info-points"></div>
             </div>
             <div class="buttons-group">
                 <button class="info-button button">Trapaça</button>
@@ -41,10 +74,7 @@
             </div>
         </nav>
         <main class="game-container">
-            <div class="gameboard-container">
-                <div class="board" id="board">
-                    <img src="./assets/modeloTabuleiro.png" alt="Modelo estático de tabuleiro">
-                </div>
+            <div class="gameboard-container board" id="gameboard">
             </div>
             <div class="game-infos">
                 <table class="table">
@@ -69,6 +99,9 @@
             <a class="button" href="./index.html">Logout</a>
         </nav>
     </div>
+
+<script src="./scripts/modal.js"></script>
+<script src="./scripts/home.js"></script>
 
 </body>
 

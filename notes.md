@@ -47,7 +47,18 @@
         - Desconectar
             - Retorna a página de login e encerra a sessão.
 
+## 2ª entrega
+
+- Página Inicial
+    - Botão novo jogo
+        - Exibir modal de configuração do jogo
+        - Criar div do jogo
+            - Embaralhar peças
+            - Exibir peças já embaralhadas
+        - Nas peças
+            - Criar função de click na peça
+                Sempre duas peças precisam ser clicadas, quando clicada correta manter peças para cima
+
 # Links
 
-[Figma](https://www.figma.com/file/2m3Nc9IfR4PuKKjQk0TG2M/Untitled?node-id=0%3A1)
-[Github](https://)
+[Github](https://github.com/diegoparreira/projetoMemoria)
