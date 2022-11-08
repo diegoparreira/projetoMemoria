@@ -314,7 +314,7 @@ function disableCards() {
 function countPoint() {
   const pointsElement = document.querySelector('#info-points');
   
-  if(isPlayerOne){
+  if(isPlayerOne && !singlePlayer){
     score.player1 += POINT_VALUE;
   }else{
     score.player2 += POINT_VALUE;
@@ -343,6 +343,7 @@ function checkWinner() {
       const winner = score.player1 > score.player2 ? `O jogador 1 venceu o jogo com ${score.player1} pontos.` : `O jogador 1 venceu o jogo com ${score.player2} pontos.`
       alert(winner);
     }
+    clear(gameInterval);
   }
 }
 
