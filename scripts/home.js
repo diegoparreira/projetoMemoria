@@ -1,13 +1,27 @@
 "use strict";
 
-let isPlaying = false;
+// Configurações do jogo
+const POINT_VALUE = 10;
+let singlePlayer;
 let timeElapsed = 0;
 let gameInterval;
+let isPlaying = false;
+let hasFlippedCard = false;
+let lockBoard = false;
+let card1, card2;
+let score = {
+  player1: 0,
+  player2: 0
+};
 let gameConfig = {
   "board": 0,
   "gameMode": 0,
   "players": 0
 };
+let isPlayerOne = true;
+let cards;
+
+// Caminhos das imagens
 let fundoPath = {path: './assets/peças_jpg/dado.png', key: 'dado' };
 let piecesPath = [
   {path: './assets/peças_jpg/arch.png', key: 'arch' },
@@ -44,7 +58,10 @@ let piecesPath = [
   {path: './assets/peças_jpg/warrior.png', key: 'warrior' }
 ];
 
+
+// Modal
 const modal1 = new Modal("my-modal-1");
+
 document.getElementById('show-modal-1').addEventListener('click', (e) => {
     modal1.show();
 });
@@ -97,7 +114,8 @@ function loadBoardConfig() {
 function handlePlayers() {
   const selectElement = document.querySelector('#config-player');
   var value = selectElement.options[selectElement.selectedIndex].label;
-  gameConfig.players = value === 'Single Player' ? 1 : 2; 
+  gameConfig.players = value === 'Single Player' ? 1 : 2;
+  singlePlayer = gameConfig.players === 1;
 }
 
 function handleBoard() {
@@ -164,7 +182,7 @@ function gameOver(){
 }
 
 function formatTime(time) {
-  let formatedTime = time < 9 ? `0${time}` : new String(time);
+  let formatedTime = time <= 9 ? `0${time}` : new String(time);
   return formatedTime;
 }
 
@@ -173,23 +191,26 @@ function clear(interval) {
 }
 
 function handleNewGame() {
-  console.log(gameConfig);
   if(gameConfig.board && gameConfig.players && gameConfig.gameMode) {
 
     const configElement = document.querySelector('#info-config');
-    const modeElement = document.querySelector('#info-mode');
+    const modeElement   = document.querySelector('#info-mode');
     const playerElement = document.querySelector('#info-players');
+    const pointsElement = document.querySelector('#info-points');
 
     modal1.hide();
 
     const configString = `${gameConfig.board}x${gameConfig.board}`;
     configElement.innerHTML = configString;
 
-    const modeString = gameConfig.gameMode == 1 ? 'Clássica' : 'Contra o tempo';
+    const modeString = gameConfig.gameMode === 1 ? 'Clássica' : 'Contra o tempo';
     modeElement.innerHTML = modeString;
 
-    const playerString = gameConfig.gameMode == 1 ? 'Single Player' : 'Multiplayer';
+    const playerString = gameConfig.players === 1 ? 'Single Player' : 'Multiplayer';
     playerElement.innerHTML = playerString;
+
+    const pointsString = gameConfig.players === 1 ? `${score.player1}` : `P1:${score.player1} | P2: ${score.player2}`;
+    pointsElement.innerHTML = pointsString;
 
     startNewGame();
   }
@@ -206,28 +227,37 @@ function createBoard() {
   const sectionBoard = document.createElement('section');
   sectionBoard.classList.add('board');
 
-  for(let i = 0 ; i < gameConfig.board ; i++) {
+  const numberOfCards = (gameConfig.board * gameConfig.board) / 2;
 
-    const newCard = document.createElement('div');
-    newCard.setAttribute('data-card', piecesPath[i].key);
-    newCard.classList.add('memory-card');
+  for(let i = 0 ; i < numberOfCards; i++){
 
-    const frontCard = document.createElement('img');
-    frontCard.setAttribute('src', piecesPath[i].path);
-    frontCard.classList.add('front-face');
-    newCard.appendChild(frontCard)
+    for(let j = 0 ; j < 2 ; j++) {
+      const newCard = document.createElement('div');
+      newCard.setAttribute('data-card', piecesPath[i].key);
+      newCard.classList.add('memory-card');
+    
+      // Criação da frente da carta
+      const frontCard = document.createElement('img');
+      frontCard.setAttribute('src', piecesPath[i].path);
+      frontCard.classList.add('front-face');
+      newCard.appendChild(frontCard);
+    
+      // Criação do fundo da carta
+      const backCard = document.createElement('img');
+      backCard.setAttribute('src', fundoPath.path);
+      backCard.classList.add('back-face');
+      newCard.appendChild(backCard);
 
-    const backCard = document.createElement('img');
-    backCard.setAttribute('src', fundoPath.path);
-    backCard.classList.add('back-face');
-    newCard.appendChild(backCard)
+      newCard.addEventListener('click', flip);
 
-    const dupCard = newCard.cloneNode(true);
-    sectionBoard.appendChild(newCard);
-    sectionBoard.appendChild(dupCard);
+      // Adicionando a nova carta ao conjunto de cartas
+      sectionBoard.appendChild(newCard);
+    }
 
   }
+
   gameBoard.appendChild(sectionBoard);
+  shuffle();
 }
 
 function clearBoard(boardElement) {
@@ -236,27 +266,111 @@ function clearBoard(boardElement) {
   }
 }
 
+function shuffle() {
+  const cards = document.querySelectorAll('.memory-card');
+  const numberOfCards = (gameConfig.board * gameConfig.board);
+  cards.forEach(card => {
+    let randomPos = Math.floor(Math.random() * numberOfCards);
+    card.style.order = randomPos;
+  });
+}
+
+function flip(){
+  if(lockBoard) return;
+  if(this === card1) return;
+
+  this.classList.add('flip');
+
+  if(!hasFlippedCard) {
+    hasFlippedCard = true;
+    card1 = this;
+
+    return;
+  }
+
+  card2 = this;
+
+  check();
+}
+
+function check() {
+  if(singlePlayer){
+    const pointsElement = document.getElementById('info-points');
+    pointsElement.innerHTML = ++score.player1;
+  }
+  let match = card1.getAttribute('data-card') === card2.getAttribute('data-card');
+  match ? disableCards() : unflipCards();
+  checkWinner();
+}
+
+function disableCards() {
+  card1.removeEventListener('click', flip);
+  card2.removeEventListener('click', flip);
+
+  resetBoard();
+  countPoint();
+}
+
+function countPoint() {
+  const pointsElement = document.querySelector('#info-points');
+  
+  if(isPlayerOne){
+    score.player1 += POINT_VALUE;
+  }else{
+    score.player2 += POINT_VALUE;
+  }
+
+  isPlayerOne = !isPlayerOne;
+
+  const pointsString = singlePlayer ? `${score.player1}` : `P1:${score.player1} | P2: ${score.player2}`;
+  pointsElement.innerHTML = pointsString;
+  
+}
+
+function resetBoard() {
+  [hasFlippedCard, lockBoard] = [false, false];
+  [card1, card2] = [null, null];
+}
+
+function checkWinner() {
+  const cards = document.querySelectorAll('.flip');
+  const endGame = cards.length === (gameConfig.board * gameConfig.board);
+
+  if(endGame){
+    if(gameConfig.players === 1){
+      alert(`Venceu o jogo com ${score.player1} jogadas.`);
+    }else{
+      const winner = score.player1 > score.player2 ? `O jogador 1 venceu o jogo com ${score.player1} pontos.` : `O jogador 1 venceu o jogo com ${score.player2} pontos.`
+      alert(winner);
+    }
+  }
+}
+
+function unflipCards() {
+  lockBoard = true;
+
+  setTimeout(() => {
+    card1.classList.remove('flip');
+    card2.classList.remove('flip');
+
+    resetBoard();
+  }, 1500);
+}
+
 function handleTrapaca() {
   if(!isPlaying){
     alert('Jogo ainda não iniciado');
     return;
   }
+  const cards = document.querySelectorAll('.memory-card');
 
-  const boardElement = document.querySelectorAll('.board-cell');
+  cards.forEach(e => {
+    e.classList.add('flip');
+    setTimeout(() => {
+      e.classList.remove('flip');
+    }, 5000);
+  })
 
-  boardElement.forEach(element => {
-    const cellElement = element.children[0];
-    if(cellElement.classList.contains('invisible')){
-      cellElement.classList.toggle('invisible');
-      setTimeout(() => {
-        element.children[0].classList.toggle('invisible');
-      }, 5000);
-    }
-  });
+  console.log(cards);
 
-}
-
-function handleClick(event) {
-  console.log(event);
-  event.path[0].children[0].classList.remove('invisible');
 }
