@@ -217,6 +217,8 @@ function handleNewGame() {
 }
 
 function startNewGame(){
+  const gameBoard = document.getElementById('gameboard');
+  clearBoard(gameBoard);
   handleTime();
   createBoard();
   isPlaying = true;
@@ -225,7 +227,9 @@ function startNewGame(){
 function createBoard() {
   const gameBoard = document.getElementById('gameboard');
   const sectionBoard = document.createElement('section');
+  const boardSize = 100 * gameConfig.board;
   sectionBoard.classList.add('board');
+  sectionBoard.style.width = boardSize + 'px';
 
   const numberOfCards = (gameConfig.board * gameConfig.board) / 2;
 
@@ -338,6 +342,8 @@ function checkWinner() {
 
   if(endGame){
     if(gameConfig.players === 1){
+      const gameBoard = document.getElementById('gameboard');
+      clearBoard(gameBoard);
       alert(`Venceu o jogo com ${score.player1} jogadas.`);
     }else{
       const winner = score.player1 > score.player2 ? `O jogador 1 venceu o jogo com ${score.player1} pontos.` : `O jogador 1 venceu o jogo com ${score.player2} pontos.`
